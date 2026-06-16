@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockNova - Личный кабинет</title>
+    <title>BlockNova - Personal Cabinet</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -20,18 +20,18 @@
             border-radius: 16px;
             border: 1px solid #8a2be2;
         }
-        h1 { 
-            color: #8a2be2; 
-            text-align: center; 
+        h1 {
+            color: #8a2be2;
+            text-align: center;
             margin-bottom: 30px;
         }
-        .info { 
-            margin: 25px 0; 
-            line-height: 1.8; 
+        .info {
+            margin: 25px 0;
+            line-height: 1.8;
             font-size: 1.1em;
         }
-        .back { 
-            text-align: center; 
+        .back {
+            text-align: center;
             margin-top: 40px;
         }
         .back a {
@@ -42,12 +42,12 @@
 </head>
 <body>
     <div class="cabinet">
-        <h1>🔐 Личный кабинет BlockNova</h1>
+        <h1>🔐 BlockNova Personal Cabinet</h1>
         <div class="info" id="clientInfo">
-            Загрузка данных...
+            Loading data...
         </div>
         <div class="back">
-            <a href="/">← Вернуться на главную</a>
+            <a href="/">← Back to Home</a>
         </div>
     </div>
 
@@ -55,27 +55,27 @@
         async function loadClientData() {
             const address = window.location.pathname.split('/client/')[1];
             if (!address) {
-                document.getElementById('clientInfo').innerHTML = "<p style='color:red'>Ошибка: адрес не найден</p>";
+                document.getElementById('clientInfo').innerHTML = "<p style='color:red'>Error: Address not found</p>";
                 return;
             }
-
             try {
                 const response = await fetch(`/api/client/${address}`);
                 if (!response.ok) throw new Error();
-                
+               
                 const data = await response.json();
-                
+               
                 document.getElementById('clientInfo').innerHTML = `
-                    <p><strong>Адрес:</strong> ${data.address}</p>
-                    <p><strong>Имя:</strong> ${data.username || 'Не указано'}</p>
-                    <p><strong>Email:</strong> ${data.email || 'Не указано'}</p>
-                    <p><strong>Дата создания:</strong> ${new Date(data.createdAt).toLocaleString('ru-RU')}</p>
-                    <p style="color:#00ff9d; margin-top:20px;">✅ Данные успешно сохранены</p>
+                    <p><strong>Address:</strong> ${data.address}</p>
+                    <p><strong>Username:</strong> ${data.username || 'Not specified'}</p>
+                    <p><strong>Email:</strong> ${data.email || 'Not specified'}</p>
+                    <p><strong>Chain:</strong> ${data.chain?.toUpperCase() || 'Ethereum'}</p>
+                    <p><strong>Created:</strong> ${new Date(data.createdAt).toLocaleString('en-US')}</p>
+                    <p style="color:#00ff9d; margin-top:20px;">✅ Data successfully saved</p>
                 `;
             } catch(e) {
                 document.getElementById('clientInfo').innerHTML = `
-                    <p style="color:orange;">⚠️ Клиент найден, но данные не удалось загрузить.</p>
-                    <p><strong>Адрес:</strong> ${address}</p>
+                    <p style="color:orange;">⚠️ Client found, but failed to load full data.</p>
+                    <p><strong>Address:</strong> ${address}</p>
                 `;
             }
         }

